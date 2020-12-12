@@ -1,17 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import axios, { AxiosResponse } from './axios';
+const baseURL = 'http://localhost:8080';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+// 服务器返回的对象
+interface User {
+  name: string,
+  password: string,
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+let user: User = {
+  name: 'nzc',
+  password: '123456'
+}
+
+axios({
+  method: 'get',
+  url: `${baseURL}/get`,
+  params: user,
+}).then((response: AxiosResponse) => {
+  console.log(response);
+  return response.data;
+}).catch((error: any) => {
+  console.log(error);
+})
