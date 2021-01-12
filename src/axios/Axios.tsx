@@ -5,21 +5,21 @@ import { AxiosRequestConfig, AxiosResponse } from './types';
 export default class Axios {
   // T 限制 response 中 data 类型
   request<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
-    return this.dispatchRequest(config);
+    return this.dispatchRequest<T>(config);
   }
 
   // 定义一个派发请求的方法
   dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return new Promise<AxiosResponse<T>> ((resolve, reject) => {
-      let { method = 'get', url, params } = config;
+      let { method = 'get', url, params, headers, data } = config;
 
       // 实例化请求
       let request = new XMLHttpRequest();
       if(params && typeof params === 'object') {
         params = qs.stringify(params);
       }
-      url += ((url.indexOf('?') === -1 ? '?' : '&') + params);
-      request.open(method, url, true);
+      url += ((url!.indexOf('?') === -1 ? '?' : '&') + params);
+      request.open(method, url!, true);
       // 想要返回的 data 类型为 json 对象
       request.responseType = 'json';
       // 指定一个状态变更函数
@@ -42,8 +42,17 @@ export default class Axios {
           }
         }
       }
+      if (headers) {
+        for(let key in headers) {
+          request.setRequestHeader(key, headers[key]);
+        }
+      }
+      let body: string | null = null;
+      if (data) {
+        body = JSON.stringify(data);
+      }
       //发送请求
-      request.send();
+      request.send(body);
     });
   }
 }

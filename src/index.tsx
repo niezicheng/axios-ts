@@ -12,10 +12,27 @@ let user: User = {
   password: '123456'
 }
 
+// get 方法
+// axios({
+//   method: 'get',
+//   url: `${baseURL}/get`,
+//   params: user,
+// }).then((response: AxiosResponse) => {
+//   console.log(response);
+//   return response.data;
+// }).catch((error: any) => {
+//   console.log(error);
+// })
+
+
+// post 方法
 axios({
-  method: 'get',
-  url: `${baseURL}/get`,
-  params: user,
+  method: 'post',
+  url: `${baseURL}/post`,
+  headers: {
+    'content-type': 'application/json',
+  },
+  data: user,
 }).then((response: AxiosResponse) => {
   console.log(response);
   return response.data;
