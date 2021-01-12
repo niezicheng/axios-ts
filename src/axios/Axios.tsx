@@ -11,21 +11,21 @@ export default class Axios {
   // 定义一个派发请求的方法
   dispatchRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return new Promise<AxiosResponse<T>> ((resolve, reject) => {
-      let { method = 'get', url, params, headers, data } = config;
+      let { method = 'get', url, params, headers, data, timeout } = config;
 
       // 实例化请求
       let request = new XMLHttpRequest();
-      if(params && typeof params === 'object') {
+      if(params) {
         params = qs.stringify(params);
+        url += ((url!.indexOf('?') === -1 ? '?' : '&') + params);
       }
-      url += ((url!.indexOf('?') === -1 ? '?' : '&') + params);
       request.open(method, url!, true);
       // 想要返回的 data 类型为 json 对象
       request.responseType = 'json';
       // 指定一个状态变更函数
       request.onreadystatechange = () => {
         // readyState 值为4，表示请求完成
-        if(request.readyState === 4) {
+        if(request.readyState === 4 && request.status !== 0) {
           if(request.status >= 200 && request.status <= 300) {
             let response: AxiosResponse<T> = {
               data: request?.response || request?.responseText,
@@ -38,7 +38,7 @@ export default class Axios {
             };
             resolve(response);
           } else {
-            reject('请求失败！！！');
+            reject(`Error: Request failed with status code ${request.status}`);
           }
         }
       }
@@ -50,6 +50,17 @@ export default class Axios {
       let body: string | null = null;
       if (data) {
         body = JSON.stringify(data);
+      }
+      // 网络错误
+      request.onerror = () => {
+        reject('net::ERR_INTERNET_DISCONNECTED');
+      }
+      // 超时错误
+      if (timeout) {
+        request.timeout = timeout;
+        request.ontimeout = () => {
+          reject(`Error: timeout of ${timeout}ms exceeded`);
+        }
       }
       //发送请求
       request.send(body);

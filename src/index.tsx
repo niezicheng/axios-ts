@@ -24,14 +24,14 @@ let user: User = {
 //   console.log(error);
 // })
 
-
 // post 方法
 axios({
   method: 'post',
-  url: `${baseURL}/post`,
+  url: `${baseURL}/post_timeout?timeout=2000`,
   headers: {
     'content-type': 'application/json',
   },
+  timeout: 1000,
   data: user,
 }).then((response: AxiosResponse) => {
   console.log(response);
@@ -39,3 +39,4 @@ axios({
 }).catch((error: any) => {
   console.log(error);
 })
+
