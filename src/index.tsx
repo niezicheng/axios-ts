@@ -24,7 +24,6 @@ axios({
   data: user,
 }).then((response: AxiosResponse) => {
   console.log(response);
-  console.log(response.data);
   return response.data;
 }).catch((error: any) => {
   console.log(error);

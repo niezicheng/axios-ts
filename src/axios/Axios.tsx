@@ -11,6 +11,14 @@ let defaults: AxiosRequestConfig = {
       accept: 'application/json',
       name: 'request-nzc'
     }
+  },
+  // 转化请求、响应
+  transformRequest: (data: any, headers: any) => {
+    headers['common']['name'] = 'transformRequest-nzc';
+    return data;
+  },
+  transformResponse: (response: any) => {
+    return response.data;
   }
 }
 
@@ -40,6 +48,11 @@ export default class Axios<T> {
   request(config: AxiosRequestConfig): Promise<AxiosRequestConfig | AxiosResponse<T>> {
     // return this.dispatchRequest<T>(config);
     config.headers = Object.assign(this.defaults.headers, config.headers);
+    config = Object.assign(this.defaults, config);
+    // 转化响应
+    if (config.transformRequest && config.data) {
+      config.data = config.transformRequest(config.data, config.headers);
+    }
     // 拦截器和请求数组链
     const chain: Array<Interceptor<AxiosRequestConfig> | Interceptor<AxiosResponse<T>>> = [
       {
@@ -101,6 +114,10 @@ export default class Axios<T> {
               config,
               request,
             };
+            // 转化响应
+            if (config.transformResponse) {
+              response = config.transformResponse(response);
+            }
             resolve(response);
           } else {
             reject(`Error: Request failed with status code ${request.status}`);
