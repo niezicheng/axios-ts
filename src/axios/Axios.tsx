@@ -2,8 +2,35 @@ import qs from 'qs';
 import parseHeaders from 'parse-headers';
 import { AxiosRequestConfig, AxiosResponse } from './types';
 import AxiosInterceptorManager, { Interceptor }  from './AxiosInterceptorManager';
+let defaults: AxiosRequestConfig = {
+  method: 'get',
+  timeout: 0,
+  headers: { // 请求头
+    common: { // 所有请求方法公共请求头配置方式
+      // 指定告诉服务器返回 json 类型数据
+      accept: 'application/json',
+      name: 'request-nzc'
+    }
+  }
+}
 
+// get 类型请求方式
+let getStyleMethods = ['get', 'head', 'delete', 'options'];
+getStyleMethods.forEach((method: string) => {
+  defaults.headers![method] = {};
+});
+
+// post 类型请求方式
+let postStyleMethods = ['post', 'put', 'patch'];
+postStyleMethods.forEach((method: string) => {
+  defaults.headers![method] = {
+    'content-type': 'application/json',
+  };
+});
+
+let allMethods = [...getStyleMethods, ...postStyleMethods];
 export default class Axios<T> {
+  public defaults: AxiosRequestConfig = defaults;
   public interceptors = {
     request: new AxiosInterceptorManager<AxiosRequestConfig>(),
     response: new AxiosInterceptorManager<AxiosResponse<T>>(),
@@ -12,6 +39,8 @@ export default class Axios<T> {
   // T 限制 response 中 data 类型
   request(config: AxiosRequestConfig): Promise<AxiosRequestConfig | AxiosResponse<T>> {
     // return this.dispatchRequest<T>(config);
+    config.headers = Object.assign(this.defaults.headers, config.headers);
+    // 拦截器和请求数组链
     const chain: Array<Interceptor<AxiosRequestConfig> | Interceptor<AxiosResponse<T>>> = [
       {
         onFulfilled: this.dispatchRequest,
@@ -79,9 +108,30 @@ export default class Axios<T> {
         }
       }
       // 设定请求头信息
+      // if (headers) {
+      //   for(let key in headers) {
+      //     request.setRequestHeader(key, headers[key]);
+      //   }
+      // }
       if (headers) {
-        for(let key in headers) {
-          request.setRequestHeader(key, headers[key]);
+        for (let key in headers) {
+          if (key === 'common' || allMethods.includes(key)) {
+            if (key === 'common' || key === config.method) {
+              for (let key2 in headers[key]) {
+                request.setRequestHeader(key2, headers[key][key2]);
+              }
+            }
+          } else {
+            request.setRequestHeader(key, headers[key]);
+          }
+
+          // if (key === 'common' || (allMethods.includes(key) && key === config.method)) {
+          //   for (let key2 in headers[key]) {
+          //     request.setRequestHeader(key2, headers[key][key2]);
+          //   }
+          // } else {
+          //   request.setRequestHeader(key, headers[key]);
+          // }
         }
       }
 
