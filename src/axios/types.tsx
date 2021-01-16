@@ -1,4 +1,5 @@
 import AxiosInterceptorManager from './AxiosInterceptorManager';
+import { CancelToken, isCancel } from './cancel';
 
 export type Methods = 'get' | 'GET' | 'post' | 'POST' | 'put' | 'PUT' | 'delete' | 'DELETE' | 'options' | 'OPTIONS';
 
@@ -11,6 +12,7 @@ export interface AxiosRequestConfig {
   timeout?: number;
   transformRequest?: (data: any, headers: any) => any;
   transformResponse?: (data: any) => any;
+  cancelToken?: any;
 }
 
 // Axios.prototype.request 方法
@@ -19,7 +21,9 @@ export interface AxiosInstance {
   interceptors: {
     request: AxiosInterceptorManager<AxiosRequestConfig>;
     response: AxiosInterceptorManager<AxiosResponse>;
-  }
+  },
+  CancelToken: CancelToken;
+  isCancel: typeof isCancel;
 }
 
 // T: 响应体的类型

@@ -171,6 +171,14 @@ export default class Axios<T> {
         }
       }
 
+      // 取消请求
+      if (config.cancelToken) {
+        config.cancelToken.then((messages: string) => {
+          request.abort();
+          reject(messages);
+        })
+      }
+
       // 4. 发送请求
       request.send(body);
     });
